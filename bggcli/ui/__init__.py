@@ -1,3 +1,6 @@
+# Modified update_select() by adding by_index parameter
+# Modified timeout from 5 to 15 seconds
+
 import os
 
 from selenium.webdriver.common.by import By
@@ -14,7 +17,7 @@ class BasePage:
         if os.environ.get('CI') == 'true':
             timeout = 60
         else:
-            timeout = 5
+            timeout = 15
         self.wait = WebDriverWait(driver, timeout)
 
     @staticmethod
@@ -29,22 +32,24 @@ class BasePage:
             elem.click()
 
     @staticmethod
-    def update_select(el, value, by_text=False):
+    def update_select(el, value, by_text=False, by_index=False):
         select = Select(el)
         if value == '':
             select.select_by_index(0)
+        elif by_index:
+            select.select_by_index(value)        
         elif by_text:
             select.select_by_visible_text(value)
         else:
             select.select_by_value(value)
 
     def update_textarea(self, root_el, fieldname, value):
-        root_el.find_element_by_xpath(".//td[@class='collection_%smod editfield']" % fieldname) \
-            .click()
-        form = self.wait.until(EC.element_to_be_clickable(
-            (By.XPATH, ".//form[contains(@id, '%s')]" % fieldname)))
-        self.update_text(form.find_element_by_xpath(".//textarea"), value)
-        form.find_element_by_xpath(".//input[contains(@onclick, 'CE_SaveData')]").click()
+        #root_el.find_element_by_xpath(".//td[@class='collection_%smod editfield']" % fieldname) \
+        #    .click()
+        input = self.wait.until(EC.element_to_be_clickable(
+            (By.XPATH, ".//textarea[contains(@id, '%s')]" % fieldname)))
+        self.update_text(input, value)
+        #form.find_element_by_xpath(".//input[contains(@onclick, 'CE_SaveData')]").click()
 
     def wait_and_accept_alert(self):
         self.wait.until(EC.alert_is_present())

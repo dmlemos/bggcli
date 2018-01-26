@@ -19,7 +19,10 @@ Introduction
 
 Only 3 operations are implemented at this time:
 
+Updated for BGG 2018
 * bulk import/update for your game collection from a CSV file
+
+Not tested with BGG 2018
 * bulk delete from a CSV file
 * bulk export as a CSV file, WITH version information (game's version is missing in the default export)
 
