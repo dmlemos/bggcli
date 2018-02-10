@@ -19,7 +19,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from bggcli import BGG_BASE_URL, BGG_SUPPORTED_FIELDS
 from bggcli.ui import BasePage
 from bggcli.util.logger import Logger
-
+import traceback
 def in_private_info_popup(func):
     """
     Ensure the Private Info popup is displayed when updating its attributes
@@ -96,7 +96,7 @@ class GamePage(BasePage):
 
     # Verified BGG 2018
     def update(self, game_attrs):
-        Logger.info("update()", append=True, break_line=True)
+        #Logger.info("update()", append=True, break_line=True)
         
         # First, see if objectid exists.
         id = game_attrs.get('objectid',None)
@@ -106,7 +106,50 @@ class GamePage(BasePage):
         if id is None:
             pass        
         return self.updateid(game_attrs)
+
+    def notincollection(self):
+        """Either returns button or False, suitable for if statement"""
+        try:
+            Logger.info("edit button? ", append=True, break_line=False)
+            button1 = self.driver.find_element_by_xpath(
+            "(//button[contains(@ng-click, 'colltoolbarctrl.editItem')])[last()]")
+            return button1
+        except NoSuchElementException:
+            return False
             
+    def openeditform(self):
+        button = self.notincollection()
+        if button:
+            button.click()
+        else:
+            Logger.info(" not found. ", append=True, break_line=False)
+            Logger.info("(i.e. game in col'n)...", append=True, break_line=False)
+            # div = self.driver.find_element_by_xpath(
+            # "(//div[@class, 'toolbar-actions'])[last()]")
+
+            Logger.info("'In Col'n' button? ", append=True, break_line=False)
+            button = self.driver.find_element_by_xpath(
+                '('
+                '//'
+                'button[@id="button-collection" and descendant::'
+                    'span[starts-with(@ng-show,"colltoolbarctrl.collection.items.length") and '
+                        'contains(text(),"In Collection")]'
+                    ']'
+                ')[last()]'
+            )
+            Logger.info("Click. ", append=True, break_line=False)
+            button.click()
+            
+            clickable = self.driver.find_element_by_xpath(
+            '//span[@class="collection-dropdown-item-edit" and //button[contains(text(),"Edit")]]')
+            Logger.info("Click col'n dropdown. ", append=True, break_line=False)
+            clickable.click()
+        
+        Logger.info("form...", append=True, break_line=False)
+        
+        self.itemEl = self.wait.until(EC.element_to_be_clickable(
+            (By.XPATH, "//div[@class='modal-content']")))
+
     # Verified BGG 2018
     def updateid(self, game_attrs):
         """
@@ -135,96 +178,15 @@ class GamePage(BasePage):
         #    6) Finally, find the form element and submit it.
         
         
-        Logger.info("updateid()", append=True, break_line=True)
-        Logger.info("{} {}, ".format(game_attrs.get('objectid',''),game_attrs.get('objectname','')), append=True, break_line=True)
+        #Logger.info("updateid()", append=True, break_line=True)
+        #Logger.info("{} {}, ".format(game_attrs.get('objectid',''),game_attrs.get('objectname','')), append=True, break_line=True)
         
         self.goto(game_attrs)
         
-        Logger.info("page, ", append=True, break_line=False)
-
-        #<div class="toolbar-actions-mobile toolbar-actions-mobile-lg"> 		<span class="toolbar-action"> 			<span item="{objecttype: geekitemctrl.geekitemParams.objecttype, objectid: geekitemctrl.geekitemParams.objectid}"> 		<!-- Placeholder button while loading  --> 		<span no-animate="" ng-show="colltoolbarctrl.loading" class="ng-hide"> 			<button class="btn btn-sm btn-primary" disabled=""> 				<i class="fi-list-thumbnails"></i> 				Loading 			</button> 		</span>  		<span no-animate="" ng-switch="colltoolbarctrl.collection.ratingitem.collid || '_undefined_'" ng-show="!colltoolbarctrl.loading" class=""> 			<!----> 			<!----><span no-animate="" ng-switch-default=""> 				<!----><span ng-include="'geekitem_toolbar_collection_not_empty.tpl'">	<div uib-dropdown="" is-open="colltoolbarctrl.isOpen" auto-close="outsideClick" class="dropdown"> 		<button id="button-collection" class="btn btn-sm btn-subtle dropdown-toggle" uib-dropdown-toggle="" login-required="" aria-haspopup="true" aria-expanded="false">  			<span ng-show="colltoolbarctrl.collection.items.length > 0" class=""><i class="fi-check"></i> 				In Collection</span><span class="hidden-xs"><span ng-show="colltoolbarctrl.collection.statuses.length > 1" class="ng-hide">s</span> 				<collection-button-status-list wrap="true" statuses="colltoolbarctrl.collection.statuses" allstatuses="colltoolbarctrl.collection.config.allstatuses" limit="1"><span><!----><span ng-repeat="status in allstatuses | orderBy: 'priority'| propertyIn :'key':statuses|limitTo:limit"><span ng-show="wrap &amp;&amp; statuses.length > 0" class="">(</span>Own</span><!----><span ng-show="statuses.length > limit" class="ng-hide">â€¦</span><span ng-show="wrap &amp;&amp; statuses.length > 0" class="">)</span></span>  </collection-button-status-list> 			</span>  			<span class="caret"></span> 		</button>  		<ul class="dropdown-menu"></ul> 	</div>   </span> 			</span><!----> 		</span> 	</span> 		</span>  		<span class="toolbar-action"> 			<subscription btn-style="white" item="{objecttype: geekitemctrl.geekitemParams.objecttype, objectid: geekitemctrl.geekitemParams.objectid}">	<div class="game-action game-action-subscribe btn-group dropdown btn-group-sm" ng-class="btnGroupClasses" role="group" uib-dropdown="" is-open="status.isOpen" ng-mouseover="subscribemouseover=true" ng-mouseleave="subscribemouseover=false" uib-tooltip="268 Subscribers" tooltip-append-to-body="true" tooltip-trigger="mouseenter"> 		<button class="btn btn-white" ng-disabled="!subIsLoaded" ng-show="!subbed" login-required="" ng-click="subscribe()"> 			Subscribe 		</button> 		<button class="btn btn-white game-action-subscribed ng-hide" ng-disabled="!subIsLoaded" ng-show="subbed" ng-click="unsubscribe()"> 			<span class="game-action-subscribed-default"> 				<i class="fi-check"></i> 			</span> 			<span class="game-action-subscribed-hover"> 				<i class="fi-x"></i> 			</span> 			Subscribed 		</button> 		<button class="btn btn-white dropdown-toggle" ng-disabled="!subIsLoaded" login-required="" uib-dropdown-toggle="" aria-haspopup="true" aria-expanded="false"> 			<span class="caret"></span> 		</button> 		<div></div> 		<ul uib-dropdown-menu="" class="dropdown-menu"> 			<li ng-show="subbed" class="ng-hide"> 				<a href="/subscription/edit/feed/thing/171273"> 					Edit Subscription 				</a> 			</li> 			<li ng-show="blockLoaded &amp;&amp; !blocked" class="ng-hide"> 				<a ng-href="" ng-click="block()"> 					Block 				</a> 			</li> 			<li ng-show="blockLoaded &amp;&amp; blocked" class="ng-hide"> 				<a href="/subscription/edit/block/thing/171273"> 					Edit Block 				</a> 			</li> 			<li ng-show="blockLoaded &amp;&amp; blocked" class="ng-hide"> 				<a ng-href="" ng-click="unblock()"> 					Unblock 				</a> 			</li> 		</ul> </div> </subscription> 		</span> 	</div>
-        #<button id="button-collection" class="btn btn-sm btn-subtle dropdown-toggle" uib-dropdown-toggle="" login-required="" aria-haspopup="true" aria-expanded="false">  			<span ng-show="colltoolbarctrl.collection.items.length > 0" class=""><i class="fi-check"></i> 				In Collection</span><span class="hidden-xs"><span ng-show="colltoolbarctrl.collection.statuses.length > 1" class="ng-hide">s</span> 				<collection-button-status-list wrap="true" statuses="colltoolbarctrl.collection.statuses" allstatuses="colltoolbarctrl.collection.config.allstatuses" limit="1"><span><!----><span ng-repeat="status in allstatuses | orderBy: 'priority'| propertyIn :'key':statuses|limitTo:limit"><span ng-show="wrap &amp;&amp; statuses.length > 0" class="">(</span>Own</span><!----><span ng-show="statuses.length > limit" class="ng-hide">â€¦</span><span ng-show="wrap &amp;&amp; statuses.length > 0" class="">)</span></span>  </collection-button-status-list> 			</span>  			<span class="caret"></span> 		</button>
-        #<span ng-show="colltoolbarctrl.collection.items.length > 0" class=""><i class="fi-check"></i> 				In Collection</span>
-            # self.span = self.driver.find_element_by_xpath(
-            # "//span[@ng-show='colltoolbarctrl.collection.items.length' and contains(.,'In Collection')]")
-
-            # # self.itemEl = self.driver.find_element_by_xpath(
-                # # "//table[@class='collectionmodule_table']")
-            # Logger.info(" (in col'n)", append=True, break_line=False)
-            
-        try:
-            Logger.info("edit button? ", append=True, break_line=False)
-            buttonelement = self.driver.find_element_by_xpath(
-            "(//button[contains(@ng-click, 'colltoolbarctrl.editItem')])[last()]").click()
-        except NoSuchElementException:
-            Logger.info(" not found. ", append=True, break_line=False)
-            Logger.info("(i.e. game in col'n)...", append=True, break_line=False)
-            # div = self.driver.find_element_by_xpath(
-            # "(//div[@class, 'toolbar-actions'])[last()]")
-
-            Logger.info("'In Col'n' button? ", append=True, break_line=False)
-            button = self.driver.find_element_by_xpath(
-            '('
-            '//'
-            #'div[@is-open="colltoolbarctrl.isOpen" and descendant::'
-            #'div[@class="dropdown"]'
-            #'span[@class="toolbar-action"]'
-            'button[@id="button-collection" and descendant::'
-            'span[starts-with(@ng-show,"colltoolbarctrl.collection.items.length") and contains(text(),"In Collection")]'
-            ']'
-            #']'
-            ')[last()]'
-            )
-            
-            Logger.info("Click. ", append=True, break_line=False)
-            button.click()
-            
-            
-            
-            #time.sleep(2)
-            #<button class="btn btn-sm btn-subtle collection-dropdown-edit" add-to-collection-button="" additem="{ collid: item.collid }"> 				<i class="fi-pencil"></i> Edit 			</button>
-            
-            #clickable = self.driver.find_element_by_xpath(
-            #'(//button[contains(text(),"Edit")])[last()]')
-            clickable = self.driver.find_element_by_xpath(
-            '//span[@class="collection-dropdown-item-edit" and //button[contains(text(),"Edit")]]')
-            Logger.info("Click col'n dropdown. ", append=True, break_line=False)
-            clickable.click()
-            #time.sleep(10)
-            # action = ActionChains(self.driver)
-            # #action=selenium.interactions.Actions(self.driver);
-            # #import selenium.webdriver.common.actions.pointer_actions 
-            # #selenium.webdriver.common.actions.pointer_actions.click(clickable)
-
-            
-            # print (clickable.get_attribute('outerHTML').encode("utf-8"))
-            # #print (clickable.size)
-            # time.sleep(2)
-            # action.move_to_element(clickable)
-            # action.perform()
-            # time.sleep(1)
-            # action.click(clickable)
-            # action.perform()
-            # time.sleep(10)
-# #            clickable.click()
-            # return
-
-        # //*[@id="mainbody"]/div/div[1]/div[2]/div[2]/ng-include/div/ng-include/div/div/div[2]/div[4]/span[2]/div[1]/span[1]/span/span[2]/span/span/span/button
-        # $x(“//input[starts-with(@name,’btn’)]”)
-        # <button class="btn btn-sm btn-primary toolbar-action-full" no-animate="" login-required="" ng-click="colltoolbarctrl.editItem( { collid: 0, 				                                          objecttype: colltoolbarctrl.item.objecttype, 				                                          objectid: colltoolbarctrl.item.objectid } )" ng-disabled="colltoolbarctrl.loading"> 			<i class="fi-list-thumbnails"></i> 			Add To 			<span class="hidden-xs">Collection</span> 			<span class="visible-xs-inline">...</span> 		</button>
-            # self.driver.find_element_by_xpath(
-                # "(//a[contains(@onclick, 'CE_ModuleAddItem')])[last()]").click()
-            # self.itemEl = self.wait.until(EC.element_to_be_clickable(
-                # (By.XPATH, "//table[@class='collectionmodule_table']")))
-
-
-        # /html/body/div[2]/div/div
-        # <div class="modal-content" uib-modal-transclude="">        
+        Logger.info("page, ", append=False, break_line=False)
+ 
+        self.openeditform()
         
-        Logger.info("form...", append=True, break_line=False)
-        self.itemEl = self.wait.until(EC.element_to_be_clickable(
-            (By.XPATH, "//div[@class='modal-content']")))
-            
         # Open advanced data entry panel.
         #<a class="toggler-caret" ng-href="" ng-click="editctrl.showvars.showAdvanced = !editctrl.showvars.showAdvanced" ng-class="{ 'is-active': editctrl.showvars.showAdvanced }"> 			<span class="glyphicon glyphicon-menu-right"></span> 			<strong>Advanced</strong> (private info, parts exchange) 		</a>
         Logger.info("Advanced button...", append=True, break_line=False)
@@ -286,7 +248,7 @@ class GamePage(BasePage):
                         dep = dependencies.get(key,None)
                         if dep:
                             #print 'depends on: ',
-                            for k,v in dep.iteritems():
+                            for k,v in dep.items(): # for python 2: iteritems()
                                 #print '{}={}?'.format(k,v),
                                 if str(game_attrs[k]) != str(v):
                                     dontdo = 1
@@ -295,15 +257,16 @@ class GamePage(BasePage):
                         getattr(self, "fill_%s" % key)(value)
         except:
             Logger.info("\nEXCEPTION.", append=True, break_line=True)
+            traceback.print_exc()
             return False
         # <button class="visible-xs-inline btn btn-primary" ng-disabled="editctrl.saving" type="submit"> 				<span>Save</span> 			</button>
         #savebutton = self.itemEl.find_element_by_xpath(".//button[@ng-disabled='editctrl.saving']")
-        Logger.info("Form?", append=True, break_line=False)
+        Logger.info("Form? ", append=True, break_line=False)
         form = self.itemEl.find_element_by_xpath(".//form[@name='collectioneditorform']")
         # action=selenium.interactions.Actions(driver);
         # import selenium.webdriver.common.actions.pointer_actions 
         # selenium.webdriver.common.actions.pointer_actions().click(savebutton)
-        Logger.info("submitting, ", append=True, break_line=False)
+        #Logger.info("submitting, ", append=True, break_line=False)
         form.submit() ;
         Logger.info("submitted. ", append=True, break_line=False)
         time.sleep(0.1)
@@ -338,17 +301,27 @@ class GamePage(BasePage):
         """
 
         self.goto(game_attrs)
+        #<button type="button" uib-tooltip="More options" tooltip-popup-delay="500" tooltip-append-to-body="true" tooltip-placement="left" class="btn btn-empty text-muted dropdown-toggle" uib-dropdown-toggle="" aria-haspopup="true" aria-expanded="false"> 				<span class="glyphicon glyphicon-option-vertical"></span> 			</button>
         try:
-            del_button = self.driver.find_element_by_xpath("//a[contains(@onclick, "
-                                                           "'CE_ModuleDeleteItem')]")
+            if self.notincollection():
+                Logger.info(" (not in collection)", append=True, break_line=False)
+                return # Not in collection
+            self.openeditform()
+            
+            more = self.driver.find_element_by_xpath("//button[@uib-tooltip='More options']'")
+            more.click()
+            
+            #<button type="button" class="btn btn-empty" ng-click="editctrl.deleteItem(editctrl.editdata.item)"> 					Delete from Collection 				</button>
+            del_button = self.driver.find_element_by_xpath('//button[ng-click="editctrl.deleteItem(editctrl.editdata.item)"]')
+            del_button.click()
         except NoSuchElementException:
-            Logger.info(" (not in collection)", append=True, break_line=False)
+            Logger.info(" Failed: can't find delete button!", append=True, break_line=False)
             return
 
-        del_button.click()
-
         # Confirm alert message
-        self.wait_and_accept_alert()
+        #<button class="btn btn-danger" ng-click="ok()">Yes, Delete</button>
+        # wait_and_accept_alert is a browser thing, not an "on page popup".
+        #self.wait_and_accept_alert()
 
     ###############################################################################################
     # All following functions are invoked dynamically, for each attribute that can be updated     #

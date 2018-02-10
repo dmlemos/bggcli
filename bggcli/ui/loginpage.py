@@ -5,7 +5,11 @@ bgg.loginpage
 Selenium Page Object to bind the login page and perform authentication
 
 """
-import urllib2
+#import urllib2
+try:
+    from urllib.parse import quote
+except:
+    from urllib2 import quote
 
 from selenium.common.exceptions import NoSuchElementException
 
@@ -48,7 +52,21 @@ class LoginPage(BasePage):
     def is_authenticated(self, login):
         try:
             self.driver.find_element_by_xpath("//div[@class='menu_login']//a[@href='/user/%s']"
-                                              % urllib2.quote(login))
+                                              % quote(login))
             return True
         except NoSuchElementException:
-            return False
+            # try: # BGG 2018 style when on a boardgame page.
+            # #<button class="btn btn-sm" type="button" login-required="">Sign In</button>
+                # self.driver.find_element_by_xpath("//button[@login-required]") 
+                # return False
+            # except NoSuchElementException:
+                # return True
+            try: # BGG 2018, when on a boardgame page.
+                #<span class="hidden-md hidden-lg"> 									MSGreg 								</span>
+                self.driver.find_element_by_xpath("//span[@class='hidden-md hidden-lg' and contains(text(),'{}')]".format(quote(login))) 
+                return True
+            except NoSuchElementException:
+                return False
+
+#            'span[starts-with(@ng-show,"colltoolbarctrl.collection.items.length") and contains(text(),"In Collection")]'
+                

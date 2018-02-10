@@ -29,18 +29,28 @@ See 'bggcli help <command>' for more information on a specific command.
 """
 import sys
 import time
-
+import importlib
 from selenium.common.exceptions import WebDriverException
 
 from docopt import docopt
+from docopt import DocoptExit
 
 from bggcli import UI_ERROR_MSG
 from bggcli.util.logger import Logger
 from bggcli.version import VERSION
-
+#import traceback
 
 def import_command_module(name):
-    return __import__('bggcli.commands.%s' % name.replace('-', '_'), fromlist=['bggcli.commands'])
+    #print(sys.path)
+    #return __import__('bggcli.commands.%s' % name.replace('-', '_'), fromlist=['bggcli.commands'])
+    mname = 'bggcli.commands.%s' % name.replace('-', '_')
+    #print(mname)
+    #print('val:')
+    #print('__name__',__name__)
+    val = importlib.import_module(mname)#,package='bggcli.commands')#, fromlist=['commands'])
+    #print('val=',val)
+    return val
+    
 
 
 def exit_unknown_command(command):
@@ -88,13 +98,21 @@ def _main(argv):
     if command == 'help':
         show_help(args['<args>'])
     else:
+        #print('argv=',argv)
         execute_command(command, argv)
 
 
 def parse_commad_args(command_module, argv):
+    #print('dir',dir(command_module))
+    #print(command_module.__doc__,argv,VERSION)
+    #try:
     result = docopt(command_module.__doc__, argv, version='bggcli %s' % VERSION,
                     options_first=False)
-
+    # except DocoptExit:
+        # traceback.print_exc()
+        # #print('hi!')
+        # raise
+    #print('result=',result)
     try:
         return result, explode_dyn_args(result['-c'])
     except StandardError:
@@ -116,17 +134,22 @@ def execute_command(command, argv):
 
     try:
         command_module = import_command_module(command)
+        print('command_module',command_module)
         command_args, command_args_options = parse_commad_args(command_module, argv)
 
         if command_args:
+            print(command_args, command_args_options)
             command_module.execute(command_args, command_args_options)
             show_duration(timer_start)
     except ImportError:
+        #traceback.print_exc()
         exit_unknown_command(command)
     except WebDriverException as e:
         Logger.error(UI_ERROR_MSG, e)
     except Exception as e:
         Logger.error("Encountered an unexpected error, please report the issue to the author", e)
+    # except:
+        # traceback.print_exc()
 
 
 if __name__ == '__main__':

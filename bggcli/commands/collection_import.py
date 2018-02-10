@@ -42,12 +42,12 @@ def execute(args, options):
     csv_reader = CsvReader(file_path)
     csv_reader.open()
     rows = []
-    try:
-        csv_reader.iterate(lambda row: rows.append(row))
-    except:
-        pass
+#    try:
+    csv_reader.iterate(lambda row: rows.append(row))
+#    except:
+#        pass
     
-    print len(rows)
+    #print(len(rows))
     # interestingrows=rows[130:]
     # print len(interestingrows)
     #sys.exit()
@@ -72,7 +72,7 @@ def execute(args, options):
             return
         while len(rows):
             row = rows.pop()
-            Logger.info('Name: {}'.format(row['objectname']))
+            Logger.info('(BGGID {}) Name: {}'.format(row['objectid'],row['objectname']))
             
             if firstrow is None or firstrow == row:
                 loop += 1
@@ -88,7 +88,7 @@ def execute(args, options):
                 Logger.info('update returned {}'.format(val))
                 
                 if val:
-                    Logger.info('Updated!')
+                    Logger.info('Updated (BGGID {0}) "{1}"'.format(row['objectid'],row['objectname']))
                 else:
                     Logger.info('returned False??, back in queue.')
                     rows.insert(0,row)

@@ -8,4 +8,4 @@ CSV_COLUMN_TO_IGNORE = ['language']
 
 
 def debug_test(msg=""):
-    print "[bggcli-test] %s" % msg
+    print("[bggcli-test] %s" % msg)

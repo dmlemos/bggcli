@@ -12,13 +12,14 @@ from selenium.common.exceptions import WebDriverException
 
 from bggcli import UI_ERROR_MSG, BGG_SUPPORTED_FIELDS
 from bggcli.util.logger import Logger
-
+import codecs
 
 class CsvReader:
     reader = None
 
     def __init__(self, file_path):
-        self.file = open(file_path, 'rU')
+        #self.file = open(file_path, 'rU') # python 2
+        self.file = codecs.open(file_path, mode='rb', encoding='utf-8', errors='replace')#, buffering=1)
         self.rowCount = 0
 
     @staticmethod
@@ -47,8 +48,8 @@ class CsvReader:
                 # Encode in UTF-8
                 for key in row:
                     value = row[key]
-                    if value is not None:
-                        row[key] = unicode(value, 'utf-8')
+                    # if value is not None:
+                        # row[key] = unicode(value, 'utf-8') # python 2
 
                 objectname = row['objectname']
                 if objectname is None or objectname == "":
