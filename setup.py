@@ -50,6 +50,6 @@ setup(
     py_modules=['bggcli'],
     tests_require=["pytest"],
     test_suite='test',
-    url='http://github.org/syllant/bggcli',
+    url='http://github.org/HiGregSmith/bggcli',
     version=VERSION
 )
