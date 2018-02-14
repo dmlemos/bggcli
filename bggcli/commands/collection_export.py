@@ -22,7 +22,12 @@ Arguments:
     <file> The CSV file to generate
 """
 import csv
-import urllib2
+import codecs
+try:
+    from urllib2 import quote, Request, urlopen
+except:
+    from urllib.request import Request, urlopen
+    from urllib.parse import quote
 import time
 import sys
 import xml.etree.ElementTree as ET
@@ -57,8 +62,8 @@ def execute(args, options):
     # Use XML2 API, see https://www.boardgamegeek.com/wiki/page/BGG_XML_API2#Collection
     # Default CSV export doesn't provide version info!
     url = '%s/xmlapi2/collection?username=%s&version=1&showprivate=1&stats=1' \
-          % (BGG_BASE_URL, urllib2.quote(login))
-    req = urllib2.Request(url, None, {'Cookie': '%s=%s' % (BGG_SESSION_COOKIE_NAME, auth_cookie)})
+          % (BGG_BASE_URL, quote(login))
+    req = Request(url, None, {'Cookie': '%s=%s' % (BGG_SESSION_COOKIE_NAME, auth_cookie)})
 
     # Get a BadStatusLine error most of times without this delay!
     # Related to Selenium, but in some conditions that I have not identified
@@ -75,7 +80,8 @@ def execute(args, options):
     if xml_file == 'true':
         xml_file_path = write_xml_file(response, dest_path)
         Logger.info("XML file save as %s" % xml_file_path)
-        source = open(xml_file_path, 'rU')
+        #source = open(xml_file_path, 'rU')
+        source = codecs.open(xml_file_path, mode='rb', encoding='utf-8', errors='replace')
     else:
         source = response
 
@@ -93,7 +99,7 @@ def execute(args, options):
 
 
 def default_export(req):
-    response = urllib2.urlopen(req)
+    response = urlopen(req)
 
     if response.code == 202:
         Logger.info('Export is queued, will retry in %ss' % EXPORT_QUERY_INTERVAL)
@@ -105,7 +111,8 @@ def default_export(req):
 
     # Write response in a text file otherwise
     try:
-        with open(ERROR_FILE_PATH, "wb") as error_file:
+        #with open(ERROR_FILE_PATH, "wb") as error_file:
+        with codecs.open(ERROR_FILE_PATH, mode='wb', encoding='utf-8', errors='replace') as error_file:
             error_file.write(response.read())
         Logger.error("Unexpected response, content has been written in %s" % ERROR_FILE_PATH)
     except Exception as e:
@@ -117,14 +124,17 @@ def default_export(req):
 
 def write_xml_file(response, csv_dest_path):
     dest_path = '.'.join(csv_dest_path.split('.')[:-1]) + '.xml'
-    with open(dest_path, "wb") as dest_file:
+    #with open(dest_path, "wb") as dest_file:
+    with codecs.open(dest_path, mode='wb', encoding='utf-8', errors='replace') as dest_file:
         dest_file.write(response.read())
 
     return dest_path
 
 
 def write_csv(source, dest_path):
-    with open(dest_path, "wb") as dest_file:
+    #with open(dest_path, "wb") as dest_file:
+    with codecs.open(dest_path, mode='w', encoding='utf-8', errors='replace') as dest_file:
+        BGG_SUPPORTED_FIELDS.extend(['pp_currency','cv_currency'])
         csv_writer = csv.DictWriter(dest_file, fieldnames=BGG_SUPPORTED_FIELDS,
                                     quoting=csv.QUOTE_ALL)
         # csv_writer.writeheader() use quotes

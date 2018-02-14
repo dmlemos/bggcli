@@ -37,7 +37,7 @@ class XmlToCsv:
     def _to_str(value):
         if value is None:
             return ""
-        return value.encode('utf8')
+        return str(value) #.encode('utf8')
 
     @staticmethod
     def _to_int(value):

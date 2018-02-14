@@ -14,11 +14,13 @@ Originally written by Sylvain Francois and updated for Python 3.6 and the 2018 B
 Only 3 operations are implemented at this time:
 
 Updated for BGG 2018
+
 * bulk import/update for your game collection from a CSV file
+* bulk export as a CSV file, WITH version information (game's version is missing in the default export)
 
 Not tested with BGG 2018
+
 * bulk delete from a CSV file
-* bulk export as a CSV file, WITH version information (game's version is missing in the default export)
 
 Warning:
 
