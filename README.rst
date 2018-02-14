@@ -2,13 +2,6 @@
 bggcli - Command Line Interface for BoardGameGeek.com
 =====================================================
 
-.. image:: https://travis-ci.org/syllant/bggcli.svg?branch=master
-    :target: https://travis-ci.org/syllant/bggcli
-
-
-.. image:: https://coveralls.io/repos/syllant/bggcli/badge.svg?branch=master
-  :target: https://coveralls.io/r/syllant/bggcli?branch=master
-
 Introduction
 ============
 
@@ -16,6 +9,7 @@ Introduction
 ``bggcli`` is a Command Line Interface providing automation for tedious tasks on
 `BoardGameGeek <http://www .boardgamegeek.com>`__ (aka BGG). It relies on the Web UI and not on the
 `official API <https://www.boardgamegeek.com/wiki/page/BGG_XML_API2>`__ which doesn't offer all features available.
+Originally written by Sylvain Francois and updated for Python 3.6 and the 2018 BGG interface by Greg Smith.
 
 Only 3 operations are implemented at this time:
 
@@ -39,11 +33,8 @@ Warning:
 
 Installation
 ============
-Python 2.7 is required.
+Python 3.6 is required.
 
-::
-
-    pip install bggcli
 
 Usage
 =====
@@ -129,7 +120,8 @@ Ideas for future versions
 Here are some ideas of additional tasks that could be implemented:
 
 * Generic import for collections, based on game names and not on the BGG internal identifier. A confirmation would be
-  required for each ambiguous name to choose among matching games provided by BGG
+  required for each ambiguous name to choose among matching games provided by BGG, this is done by BGGUPLOAD
+  available on github.
 * Update/Delete for plays
 * Update/Delete for forum subscriptions
 
@@ -139,8 +131,9 @@ Links
 * *BoardGameGeek*: http://www.boardgamegeek.com
 * *Officiel XML API 2*: https://www.boardgamegeek.com/wiki/page/BGG_XML_API2
 * *boardgamegeek - A Python API for boardgamegeek.com*: https://github.com/lcosmin/boardgamegeek
+* *bggupload - This program helps you interactively find the BGGID from a partial name or inexact match.*: https://github.com/HiGregSmith/bggupload
 
-Final note
+Final note (by Sylvain Francois)
 ==========
 
 Does it really deserve such a development? Probably not, but my second goal was to discover the Python ecosystem!

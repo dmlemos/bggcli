@@ -30,9 +30,11 @@ from bggcli.ui.loginpage import LoginPage
 from bggcli.util.csvreader import CsvReader
 from bggcli.util.logger import Logger
 from bggcli.util.webdriver import WebDriver
+from selenium.common.exceptions import WebDriverException
+
 import traceback
 
-LOOPLIMIT = 30
+LOOPLIMIT = 5
 def execute(args, options):
     print('Executing!')
     login = args['--login']
@@ -43,67 +45,69 @@ def execute(args, options):
     csv_reader.open()
     rows = []
 #    try:
+    Logger.info("Parsing input file '{}'...".format(file_path))
     csv_reader.iterate(lambda row: rows.append(row))
-#    except:
-#        pass
+    #Logger.info("Found %s games to put in collection..." % csv_reader.rowCount)
+    rows.reverse()
+    firstrow = rows[0]
+    loop = 0
     
-    #print(len(rows))
-    # interestingrows=rows[130:]
-    # print len(interestingrows)
-    #sys.exit()
-    
-    Logger.info("Importing games for '%s' account..." % login)
+    Logger.info("Importing {} games to collection of '{}' ...".format(csv_reader.rowCount,login))
+    while rows:
+        try:
+            with WebDriver('collection-import', args, options) as web_driver:
+                if not LoginPage(web_driver.driver).authenticate(login, args['--password']):
+                    sys.exit(1)
+                #input("Kill Firefox, then Press Enter to continue...")
+                game_page = GamePage(web_driver.driver)
+                while rows:
+                    row = rows.pop()
+                    if firstrow is None or firstrow == row:
+                        loop += 1
+                        if loop >= LOOPLIMIT:
+                            Logger.info("Loop limit of {} reached.".format(loop))
+                            return
+                        Logger.info('Loop {} (maximum {})'.format(loop,LOOPLIMIT))
+                        if rows:
+                            firstrow = rows[0]
+                            Logger.info('First assigned {}'.format(firstrow['objectname']))
+                        else:
+                            firstrow = None
+                            Logger.info('First assigned None')
+                            
+                    Logger.info('(BGGID {}) Name: {} ({} game left)'.format(row['objectid'],row['objectname'],len(rows)+1))
+                    
+                    try:
+                        val = game_page.update(row)
+                        Logger.info('update returned {}'.format(val))
+                        
+                        if val:
+                            #Logger.info('Updated (BGGID {0}) "{1}"'.format(row['objectid'],row['objectname']))
+                            Logger.info('(BGGID {}) Name: {} UPDATED!'.format(row['objectid'],row['objectname'],len(rows)))
+                            #  ({} game left)
+                        else:
+                            rows.insert(0,row)
+                            Logger.info('returned False??, back in queue.'.format(len(rows))) #  ({} game left)
 
-    with WebDriver('collection-import', args, options) as web_driver:
-        if not LoginPage(web_driver.driver).authenticate(login, args['--password']):
-            sys.exit(1)
+                    except WebDriverException:
+                        rows.insert(0,row)
+                        Logger.info('Exception occurred, back in queue.'.format(len(rows))) # ({} left)
+                        Logger.info('WebDriverException occurred, restarting browser.')
+                        raise
+                        
+                    except Exception as e:
+                        traceback.print_exc(limit=2, file=sys.stdout)
 
-        Logger.info("Importing %s games to collection..." % csv_reader.rowCount)
-        game_page = GamePage(web_driver.driver)
-        #csv_reader.iterate(lambda row: game_page.update(row))
-        #badrows = []
-        #rows = rows[:5]
-        rows.reverse()
-        firstrow = rows[0]
-        loop = 1
-        Logger.info('Loop {}'.format(loop))
-        if loop > LOOPLIMIT:
-            Logger.info("Loop limit of {} reached.".format(loop))
-            return
-        while len(rows):
-            row = rows.pop()
-            Logger.info('(BGGID {}) Name: {}'.format(row['objectid'],row['objectname']))
-            
-            if firstrow is None or firstrow == row:
-                loop += 1
-                Logger.info('Loop {}'.format(loop))
-                if rows:
-                    firstrow = rows[0]
-                    Logger.info('First assigned {}'.format(firstrow['objectname']))
-                else:
-                    firstrow = None
-                    Logger.info('First assigned None')
-            try:
-                val = game_page.update(row)
-                Logger.info('update returned {}'.format(val))
-                
-                if val:
-                    Logger.info('Updated (BGGID {0}) "{1}"'.format(row['objectid'],row['objectname']))
-                else:
-                    Logger.info('returned False??, back in queue.')
-                    rows.insert(0,row)
+                        rows.insert(0,row)
+                        Logger.info('Exception occurred, back in queue.'.format(len(rows))) #  ({} left)
 
-            except Exception as e:
-                traceback.print_exc(limit=2, file=sys.stdout)
-
-                Logger.info('Exception occurred, back in queue.')
-                rows.insert(0,row)
-
-                #badrows.append(row)
-        # for row in rows:
-            # try:
-                # game_page.update(row)
-            # except:
-                # badrows.append(row)
-            # print
-        Logger.info("Import has finished.")
+                        #badrows.append(row)
+                # for row in rows:
+                    # try:
+                        # game_page.update(row)
+                    # except:
+                        # badrows.append(row)
+                    # print
+        except WebDriverException:
+            pass
+    Logger.info("Import has finished.")

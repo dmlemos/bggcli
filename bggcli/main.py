@@ -134,11 +134,11 @@ def execute_command(command, argv):
 
     try:
         command_module = import_command_module(command)
-        print('command_module',command_module)
+        #print('command_module',command_module)
         command_args, command_args_options = parse_commad_args(command_module, argv)
 
         if command_args:
-            print(command_args, command_args_options)
+            #print(command_args, command_args_options)
             command_module.execute(command_args, command_args_options)
             show_duration(timer_start)
     except ImportError:

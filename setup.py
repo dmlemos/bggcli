@@ -20,8 +20,8 @@ with open('README.rst', 'r', encoding='utf8') as f:
     long_description = f.read()
 
 setup(
-    author='Sylvain Francois',
-    author_email='syllant@gmail.com',
+    author='Greg Smith <ecomputerd@yahoo.com>, Sylvain Francois <syllant@gmail.com>',
+    author_email='ecomputerd@yahoo.com',
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Console",
@@ -30,7 +30,7 @@ setup(
         "Natural Language :: English",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.6",
         "Topic :: Games/Entertainment :: Board Games"
     ],
     cmdclass={'test': PyTest},
