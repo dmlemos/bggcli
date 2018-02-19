@@ -45,7 +45,7 @@ setup(
     keywords='bgg boardgamegeek',
     license='MIT',
     long_description=long_description,
-    name='bggcli',
+    name='bggcli[2018]',
     packages=find_packages(),
     py_modules=['bggcli'],
     tests_require=["pytest"],
