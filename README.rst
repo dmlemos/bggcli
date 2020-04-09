@@ -35,11 +35,11 @@ Warning:
 
 Installation
 ============
-Python 3.6 is required.
+Python 3.6 or 3.7 is required.
 
 ::
 
-    pip install bggcli[2018]
+    pip install bggcli2018
     
 
 Usage
