@@ -13,14 +13,14 @@ UI_ERROR_MSG = "Unexpected error while controlling the UI!\nEither the web pages
                "changed and bggcli must be updated, or the site is down for " \
                "maintenance."
 
-BGG_SUPPORTED_FIELDS = ['objectname', 'objectid', 'rating', 'own',
-                        'fortrade', 'want', 'wanttobuy', 'wanttoplay', 'prevowned',
-                        'preordered', 'wishlist', 'wishlistpriority', 'wishlistcomment',
-                        'comment', 'conditiontext', 'haspartslist', 'wantpartslist',
-                        'publisherid', 'imageid', 'year', 'language', 'other', 'pricepaid',
-                        'pp_currency', 'currvalue', 'cv_currency', 'acquisitiondate',
-                        'acquiredfrom', 'quantity', 'privatecomment',
-                        '_versionid']
+# BGG_SUPPORTED_FIELDS = ['objectname', 'objectid', 'rating', 'own',
+#                         'fortrade', 'want', 'wanttobuy', 'wanttoplay', 'prevowned',
+#                         'preordered', 'wishlist', 'wishlistpriority', 'wishlistcomment',
+#                         'comment', 'conditiontext', 'haspartslist', 'wantpartslist',
+#                         'publisherid', 'imageid', 'year', 'language', 'other', 'pricepaid',
+#                         'pp_currency', 'currvalue', 'cv_currency', 'acquisitiondate',
+#                         'acquiredfrom', 'quantity', 'privatecomment',
+#                         '_versionid']
 
 BGG_SUPPORTED_FIELDS = ['own',
                         'want', 'wanttobuy', 'wanttoplay', 'prevowned',
@@ -28,15 +28,15 @@ BGG_SUPPORTED_FIELDS = ['own',
                         'fortrade', 'conditiontext',   # these must be in this order
                         'wishlist', 'wishlistpriority', 'wishlistcomment', # these must be in this order
                         'comment', 'rating',
-                        'pricepaid', 'currvalue', 
+                        'pricepaid', 'currvalue',
                         'acquisitiondate', 'acquiredfrom', 'quantity', 'privatecomment',
                         'haspartslist', 'wantpartslist','publisherid', 'imageid',
                         'year', 'language', 'other',
                         #'cv_currency', 'pp_currency',
-                        'objectname', 
+                        'objectname',
                         'objectid', '_versionid', 'invlocation'
                        ]
-                       
+
 # More fields in the add/edit collection dialog:
 # Inventory Date
 # Inventory Location
